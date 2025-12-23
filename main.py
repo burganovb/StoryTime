@@ -6,7 +6,7 @@ import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -152,7 +152,7 @@ def get_story(story_id: str) -> dict[str, Any]:
 @app.post("/api/stories")
 async def create_story(
     audio: UploadFile = File(...),
-    title: Optional[str] = Form(None),
+    title: str | None = Form(None),
 ) -> dict[str, Any]:
     story_id = str(uuid.uuid4())
     created_at = datetime.utcnow().isoformat()
