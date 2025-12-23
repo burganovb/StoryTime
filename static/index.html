@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoryTime MVP</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>StoryTime</h1>
+      <p class="tagline">Turn little stories into a 4-panel comic.</p>
+    </header>
+
+    <main>
+      <section class="card" id="record-section">
+        <h2>Record</h2>
+        <p>Tap once to record a 10–60 second story.</p>
+        <div class="record-controls">
+          <button id="record-btn" class="primary">Start Recording</button>
+          <button id="stop-btn" class="secondary" disabled>Stop</button>
+        </div>
+        <div class="status" id="record-status">Ready to record.</div>
+      </section>
+
+      <section class="card" id="generate-section">
+        <h2>Generate</h2>
+        <p>We&apos;ll generate 4 comic panels while you watch.</p>
+        <button id="generate-btn" class="primary" disabled>Generate Comic</button>
+        <div class="progress" id="progress-area"></div>
+      </section>
+
+      <section class="card" id="viewer-section">
+        <h2>Story Viewer</h2>
+        <div id="story-viewer" class="story-viewer">
+          <p class="empty">Record and generate a story to see it here.</p>
+        </div>
+      </section>
+
+      <section class="card" id="stories-section">
+        <h2>My Stories</h2>
+        <ul id="stories-list" class="stories-list"></ul>
+      </section>
+    </main>
+
+    <template id="panel-template">
+      <article class="panel">
+        <img alt="Comic panel" />
+        <p class="caption"></p>
+      </article>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

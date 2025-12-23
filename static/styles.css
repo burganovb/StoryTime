@@ -1,0 +1,175 @@
+:root {
+  color-scheme: light;
+  font-family: 'Trebuchet MS', system-ui, sans-serif;
+  background: #fdf7f0;
+  color: #2d2a2e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 1.25rem 3rem;
+}
+
+.app-header {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.tagline {
+  margin: 0.5rem 0 0;
+  color: #5c5562;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.record-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: #ff9f68;
+  color: #2d2a2e;
+}
+
+.secondary {
+  background: #f2e9e1;
+  color: #2d2a2e;
+}
+
+.status {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  color: #4e4854;
+}
+
+.progress {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  color: #7a4a8c;
+}
+
+.story-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.viewer-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.viewer-header audio {
+  width: 100%;
+}
+
+.transcript {
+  background: #f9f2ea;
+  padding: 0.75rem;
+  border-radius: 12px;
+}
+
+.panels-wrapper {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  background: #fff7ef;
+  border-radius: 16px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.panel img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.panel.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.caption {
+  font-weight: 600;
+}
+
+.stories-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.story-item button {
+  width: 100%;
+  text-align: left;
+  background: #f7f0fb;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.story-title {
+  display: block;
+  font-weight: 700;
+}
+
+.story-date {
+  display: block;
+  font-size: 0.85rem;
+  color: #6f6674;
+}
+
+.empty {
+  color: #6f6674;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
