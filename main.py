@@ -6,8 +6,9 @@ import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
+import whisper
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -17,8 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "stories.db"
 STORAGE_DIR = BASE_DIR / "storage"
 AUDIO_DIR = STORAGE_DIR / "audio"
+TRANSCRIPTS_DIR = STORAGE_DIR / "transcripts"
 
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
 
 BANNED_TERMS = {
     "gun",
@@ -52,10 +55,17 @@ def init_db() -> None:
                 created_at TEXT NOT NULL,
                 audio_url TEXT NOT NULL,
                 transcript TEXT NOT NULL,
-                panels_json TEXT NOT NULL
+                panels_json TEXT NOT NULL,
+                transcript_url TEXT
             )
             """
         )
+        try:
+            conn.execute(
+                "ALTER TABLE stories ADD COLUMN transcript_url TEXT"
+            )
+        except sqlite3.OperationalError:
+            pass
         conn.commit()
 
 
@@ -101,6 +111,12 @@ def generate_panel_plan(transcript: str) -> dict[str, Any]:
         "characters": [{"name": hero, "traits": "curious, brave, kind"}],
         "panels": panels,
     }
+
+
+def transcribe_audio(audio_path: Path) -> str:
+    model = whisper.load_model("base")
+    result = model.transcribe(str(audio_path))
+    return safe_text(result["text"].strip())
 
 
 def build_panels(panel_plan: dict[str, Any]) -> list[dict[str, str]]:
@@ -152,7 +168,7 @@ def get_story(story_id: str) -> dict[str, Any]:
 @app.post("/api/stories")
 async def create_story(
     audio: UploadFile = File(...),
-    title: str | None = Form(None),
+    title: Optional[str] = Form(None),
 ) -> dict[str, Any]:
     story_id = str(uuid.uuid4())
     created_at = datetime.utcnow().isoformat()
@@ -162,9 +178,10 @@ async def create_story(
         content = await audio.read()
         handle.write(content)
 
-    transcript = safe_text(
-        "".join(["A kid tells a story about a brave friend and a sunny day."])
-    )
+    transcript = transcribe_audio(audio_path)
+    transcript_file = TRANSCRIPTS_DIR / f"{story_id}.txt"
+    transcript_file.write_text(transcript)
+    transcript_url = f"/transcripts/{transcript_file.name}"
     panel_plan = generate_panel_plan(transcript)
     panels = build_panels(panel_plan)
 
@@ -174,8 +191,8 @@ async def create_story(
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             """
-            INSERT INTO stories (id, title, created_at, audio_url, transcript, panels_json)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO stories (id, title, created_at, audio_url, transcript, panels_json, transcript_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 story_id,
@@ -184,6 +201,7 @@ async def create_story(
                 audio_url,
                 transcript,
                 json.dumps(panels),
+                transcript_url,
             ),
         )
         conn.commit()
@@ -194,6 +212,7 @@ async def create_story(
         "created_at": created_at,
         "audio_url": audio_url,
         "transcript": transcript,
+        "transcript_url": transcript_url,
         "panels": panels,
     }
 
@@ -207,3 +226,11 @@ def get_audio(filename: str) -> FileResponse:
     if not audio_path.exists():
         raise HTTPException(status_code=404, detail="Audio not found")
     return FileResponse(audio_path)
+
+
+@app.get("/transcripts/{filename}")
+def get_transcript(filename: str) -> FileResponse:
+    transcript_path = TRANSCRIPTS_DIR / filename
+    if not transcript_path.exists():
+        raise HTTPException(status_code=404, detail="Transcript not found")
+    return FileResponse(transcript_path, media_type="text/plain")
